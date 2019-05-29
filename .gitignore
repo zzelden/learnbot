@@ -1,0 +1,6 @@
+*.txt
+.vscode/
+*.log
+settings.py
+__pycache__/
+env/
