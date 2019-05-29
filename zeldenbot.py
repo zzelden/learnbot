@@ -1,7 +1,13 @@
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-import logging
-import settings
 import ephem
+from glob import glob
+import logging
+from random import choice
+
+from emoji import emojize
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, RegexHandler
+from telegram import ReplyKeyboardMarkup
+
+import settings
 
 logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO,
@@ -14,20 +20,38 @@ def main():
 
     logging.info('Бот запустился')
     dp = mybot.dispatcher
-    dp.add_handler(CommandHandler('start', greet_user))
+    dp.add_handler(CommandHandler('start', greet_user, pass_user_data=True))
     dp.add_handler(CommandHandler('planet', planet))
     dp.add_handler(CommandHandler('wordcount', wordcount))
     dp.add_handler(CommandHandler('moon', next_full_moon))
-    dp.add_handler(MessageHandler(Filters.text, talk_to_me))
+    dp.add_handler(RegexHandler('^(Прислать котика)$', send_cat_picture))
+    dp.add_handler(RegexHandler('^(Сменить аватарку)$', change_avatar, pass_user_data=True))
+    dp.add_handler(MessageHandler(Filters.text, talk_to_me, pass_user_data=True))
+
 
     mybot.start_polling()
     mybot.idle()
 
+def change_avatar(bot, update, user_data):
+    if 'emo' in user_data:
+        del user_data['emo']
+    emo = get_user_emo(user_data)
+    update.message.reply_text(f'Готово {emo}')
+    
+def get_user_emo(user_data):
+    if 'emo' in user_data:
+        return user_data['emo']
+    else:
+        user_data['emo'] = emojize(choice(settings.USER_EMOJI), use_aliases=True)
+        return user_data['emo']
 
-def greet_user(bot, update):
-    text = ('Вызван /start')
-    print(text)
-    update.message.reply_text(text)
+
+def greet_user(bot, update, user_data):
+    emo = get_user_emo(user_data)
+    #user_data['emo'] = emo
+    text = f'Привет {emo}'
+    my_keyboard = ReplyKeyboardMarkup([['Прислать котика', 'Сменить аватарку']], resize_keyboard=True)
+    update.message.reply_text(text, reply_markup=my_keyboard)
 
 
 def next_full_moon(bot, update):
@@ -79,5 +103,14 @@ def talk_to_me(bot, update):
     print(update.message)
     update.message.reply_text(user_text)
 
+def send_cat_picture(bot, update):
+    cat_list = glob('images/cat*.jp*g')
+    cat_pic = choice(cat_list)
+    bot.send_photo(chat_id=update.message.chat.id, photo=open(cat_pic, 'rb'))
+
+def send_cat_picture2(bot, update):
+    cat_list = glob('images/cat*.jp*g')
+    cat_pic = choice(cat_list)
+    bot.send_photo(chat_id=update.message.chat.id, photo=open(cat_pic, 'rb'))
 
 main()

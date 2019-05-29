@@ -2,5 +2,7 @@
 .vscode/
 *.log
 settings.py
+test.py
 __pycache__/
 env/
+images/
