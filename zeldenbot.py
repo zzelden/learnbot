@@ -1,6 +1,6 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, RegexHandler
 
-from handlers import greet_user, talk_to_me, send_cat_picture, change_avatar, planet, next_full_moon, wordcount
+from handlers import greet_user, talk_to_me, send_cat_picture, change_avatar, planet, next_full_moon, wordcount, check_user_photo
 import logging
 import settings
 
@@ -23,7 +23,9 @@ def main():
     dp.add_handler(CommandHandler('moon', next_full_moon))
     dp.add_handler(RegexHandler('^(Прислать котика)$', send_cat_picture))
     dp.add_handler(RegexHandler('^(Сменить аватарку)$', change_avatar, pass_user_data=True))
+    dp.add_handler(MessageHandler(Filters.photo, check_user_photo, pass_user_data=True))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me, pass_user_data=True))
+    
     mybot.start_polling()
     mybot.idle()
 
