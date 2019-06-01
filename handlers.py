@@ -1,6 +1,7 @@
 import ephem
 import logging
 import os
+from re import findall
 from datetime import datetime
 
 from glob import glob
@@ -12,7 +13,6 @@ from utils import get_user_emo, is_cat
 
 def greet_user(bot, update, user_data):
     emo = get_user_emo(user_data)
-    # user_data['emo'] = emo
     text = f'Привет {emo}'
     my_keyboard = ReplyKeyboardMarkup([['Прислать котика', 'Сменить аватарку']], resize_keyboard=True)
     # my_keyboard = ReplyKeyboardMarkup([['Прислать котика', 'Сменить аватарку', 'Следующее полнолуние']], resize_keyboard=True)
@@ -27,17 +27,9 @@ def next_full_moon(bot, update):
 
 def wordcount(bot, update):
     text = update.message.text.replace('/wordcount', '')
-    word_list = text.split()
-    filtered_list = list(filter(str_filter, word_list))
-    word_count = len(filtered_list)
+    pattern = r"\b[a-zA-Zа-я]+\b"
+    word_count = len(findall(pattern, text))
     update.message.reply_text("Слов: {} ".format(word_count))
-
-
-def str_filter(x):
-    if x.isalpha():
-        return 1
-    else:
-        return 0
 
 
 def planet(bot, update):
@@ -63,9 +55,10 @@ def talk_to_me(bot, update):
         f"Ты написал: {update.message.text}"
     )
     logging.info(
-        'User: %s, Chat id: %s, Message: %s',
-        update.message.chat.username,
-        update.message.chat.id, update.message.text)
+        f"User: {update.message.chat.username} "
+        f"Chat id: {update.message.chat.id} "
+        f"Message: {update.message.text}"
+       )
     print(update.message)
     update.message.reply_text(user_text)
 
@@ -87,13 +80,12 @@ def check_user_photo(bot, update, user_data):
     update.message.reply_text("Обрабатываю фото")
     os.makedirs('downloads', exist_ok=True)
     photo_file = bot.getFile(update.message.photo[-1].file_id)
-    filename = os.path.join('downloads', '{}.jpg'.format(photo_file.file_id))
+    filename = os.path.join(f'downloads', '{photo_file.file_id}.jpg')
     photo_file.download(filename)
     if is_cat(filename):
         update.message.reply_text("Обнаружен котик, добавляю в библиотеку.")
-        new_filename = os.path.join('images', 'cat_{}.jpg'.format(photo_file.file_id))
+        new_filename = os.path.join(f'images', 'cat_{photo_file.file_id}.jpg')
         os.rename(filename, new_filename)
     else:
         os.remove(filename)
         update.message.reply_text("Котика нет")
-

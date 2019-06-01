@@ -1,6 +1,5 @@
 from emoji import emojize
 from random import choice
-import pprint
 
 from clarifai.rest import ClarifaiApp
 import settings
@@ -24,9 +23,6 @@ def is_cat(file_name):
             if concept['name'] == 'cat':
                 image_has_cat = True
     return image_has_cat
-
-    # pp = pprint.PrettyPrinter(indent=2)
-    # pp.pprint(response)
 
 
 if __name__ == "__main__":

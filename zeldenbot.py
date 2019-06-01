@@ -24,7 +24,7 @@ def main():
     dp.add_handler(RegexHandler('^(Прислать котика)$', send_cat_picture))
     dp.add_handler(RegexHandler('^(Сменить аватарку)$', change_avatar, pass_user_data=True))
     dp.add_handler(MessageHandler(Filters.photo, check_user_photo, pass_user_data=True))
-    dp.add_handler(MessageHandler(Filters.text, talk_to_me, pass_user_data=True))
+    dp.add_handler(MessageHandler(Filters.text, talk_to_me))
     
     mybot.start_polling()
     mybot.idle()
